@@ -7,6 +7,8 @@ import {
   ShieldCheck,
   Users as UsersIcon,
   Settings,
+  LogOut,
+  ChevronRight,
   Plus,
   Search,
   MoreHorizontal,
@@ -19,7 +21,7 @@ import { useAuth } from "../context/useAuth";
 import { apiRequest } from "../services/api";
 
 function Companies() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -35,6 +37,15 @@ function Companies() {
   const [formError, setFormError] = useState("");
 
   const [openMenu, setOpenMenu] = useState(null);
+
+  const isSystemAdmin = user?.roles?.includes("SYSTEM_ADMIN");
+
+  const firstLetter =
+    user?.name?.charAt(0)?.toUpperCase() || "U";
+
+  const displayRole = isSystemAdmin
+    ? "System Administrator"
+    : "User";
 
   // =====================================================
   // FETCH COMPANIES
@@ -265,11 +276,7 @@ function Companies() {
 
             <span>Dashboard</span>
 
-            <span className="ml-auto">
-              <span className="block h-4 w-4 opacity-0 transition group-hover:opacity-100">
-                →
-              </span>
-            </span>
+            <ChevronRight className="ml-auto h-4 w-4 opacity-0 transition group-hover:opacity-100" />
           </Link>
 
           {/* Companies - Active */}
@@ -291,11 +298,7 @@ function Companies() {
 
             <span>Company Admins</span>
 
-            <span className="ml-auto">
-              <span className="block h-4 w-4 opacity-0 transition group-hover:opacity-100">
-                →
-              </span>
-            </span>
+            <ChevronRight className="ml-auto h-4 w-4 opacity-0 transition group-hover:opacity-100" />
           </Link>
 
           {/* Users */}
@@ -307,11 +310,7 @@ function Companies() {
 
             <span>Users</span>
 
-            <span className="ml-auto">
-              <span className="block h-4 w-4 opacity-0 transition group-hover:opacity-100">
-                →
-              </span>
-            </span>
+            <ChevronRight className="ml-auto h-4 w-4 opacity-0 transition group-hover:opacity-100" />
           </Link>
 
           <div className="my-6 border-t border-white/10" />
@@ -331,6 +330,41 @@ function Companies() {
           </a>
 
         </nav>
+
+        {/* User section */}
+        <div className="absolute bottom-0 left-0 right-0 border-t border-white/10 p-4">
+
+          <div className="mb-4 flex items-center gap-3">
+
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#4F46E5] text-sm font-semibold text-white">
+              {firstLetter}
+            </div>
+
+            <div className="min-w-0">
+
+              <p className="truncate text-sm font-medium text-white">
+                {user?.name}
+              </p>
+
+              <p className="truncate text-xs text-slate-400">
+                {displayRole}
+              </p>
+
+            </div>
+
+          </div>
+
+          <button
+            onClick={logout}
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-white/10 px-3 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-white/5 hover:text-white"
+          >
+            <LogOut className="h-4 w-4" />
+
+            Sign out
+          </button>
+
+        </div>
+
       </aside>
 
       {/* =====================================================
@@ -343,6 +377,7 @@ function Companies() {
         <header className="flex h-16 items-center justify-between border-b border-[#E2E8F0] bg-white px-6 lg:px-8">
 
           <div>
+
             <h1 className="text-lg font-semibold text-[#0F172A]">
               Companies
             </h1>
@@ -350,10 +385,27 @@ function Companies() {
             <p className="text-xs text-[#64748B]">
               Manage companies registered in the system
             </p>
+
           </div>
 
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#4F46E5] text-sm font-semibold text-white">
-            {user?.name?.charAt(0)?.toUpperCase() || "U"}
+          <div className="flex items-center gap-3">
+
+            <div className="hidden text-right sm:block">
+
+              <p className="text-sm font-medium text-[#0F172A]">
+                {user?.name}
+              </p>
+
+              <p className="text-xs text-[#64748B]">
+                {displayRole}
+              </p>
+
+            </div>
+
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#4F46E5] text-sm font-semibold text-white">
+              {firstLetter}
+            </div>
+
           </div>
 
         </header>
@@ -394,9 +446,11 @@ function Companies() {
           {/* Error */}
           {error && (
             <div className="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3">
+
               <p className="text-sm font-medium text-red-700">
                 {error}
               </p>
+
             </div>
           )}
 
@@ -472,7 +526,9 @@ function Companies() {
                 <div className="flex min-h-64 flex-col items-center justify-center px-6 text-center">
 
                   <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50">
+
                     <Building2 className="h-6 w-6 text-[#4F46E5]" />
+
                   </div>
 
                   <h3 className="mt-4 text-sm font-semibold text-[#0F172A]">
@@ -534,7 +590,9 @@ function Companies() {
                             <div className="flex items-center gap-3">
 
                               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-50">
+
                                 <Building2 className="h-4 w-4 text-[#4F46E5]" />
+
                               </div>
 
                               <div>
@@ -662,9 +720,11 @@ function Companies() {
 
                 {formError && (
                   <div className="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3">
+
                     <p className="text-sm text-red-600">
                       {formError}
                     </p>
+
                   </div>
                 )}
 
@@ -726,6 +786,7 @@ function Companies() {
           </div>
         </div>
       )}
+
     </div>
   );
 }

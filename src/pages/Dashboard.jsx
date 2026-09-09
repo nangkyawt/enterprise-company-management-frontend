@@ -23,6 +23,9 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const isSystemAdmin = user?.roles?.includes("SYSTEM_ADMIN");
+  const isCompanyAdmin = user?.roles?.includes("COMPANY_ADMIN");
+
   useEffect(() => {
     const fetchDashboard = async () => {
       try {
@@ -113,6 +116,34 @@ function Dashboard() {
   const firstLetter =
     user?.name?.charAt(0)?.toUpperCase() || "U";
 
+  const companyName =
+    dashboardData?.dashboard?.company?.name || "—";
+
+  const roleCounts =
+    dashboardData?.dashboard?.roleCounts || {
+      HR: 0,
+      MANAGER: 0,
+      USER: 0,
+    };
+
+  const displayRole = isSystemAdmin
+    ? "System Administrator"
+    : isCompanyAdmin
+      ? "Company Administrator"
+      : user?.roles?.[0] || "User";
+
+  const dashboardTitle = isSystemAdmin
+    ? "System Admin Dashboard"
+    : isCompanyAdmin
+      ? "Company Admin Dashboard"
+      : "Dashboard";
+
+  const dashboardDescription = isSystemAdmin
+    ? "Enterprise management overview"
+    : isCompanyAdmin
+      ? "Company management overview"
+      : "Your account overview";
+
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
 
@@ -134,7 +165,7 @@ function Dashboard() {
         <nav className="p-4">
 
           <p className="mb-3 px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-            System
+            {isSystemAdmin ? "System" : "Company"}
           </p>
 
           {/* Dashboard */}
@@ -146,41 +177,60 @@ function Dashboard() {
             Dashboard
           </Link>
 
-          {/* Companies */}
-          <Link
-            to="/companies"
-            className="group mb-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white"
-          >
-            <Building2 className="h-[18px] w-[18px]" />
+          {/* ================= SYSTEM ADMIN NAVIGATION ================= */}
+          {isSystemAdmin && (
+            <>
+              {/* Companies */}
+              <Link
+                to="/companies"
+                className="group mb-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white"
+              >
+                <Building2 className="h-[18px] w-[18px]" />
 
-            <span>Companies</span>
+                <span>Companies</span>
 
-            <ChevronRight className="ml-auto h-4 w-4 opacity-0 transition group-hover:opacity-100" />
-          </Link>
+                <ChevronRight className="ml-auto h-4 w-4 opacity-0 transition group-hover:opacity-100" />
+              </Link>
 
-          {/* Company Admins */}
-          <Link
-            to="/company-admins"
-            className="group mb-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white"
-          >
-            <ShieldCheck className="h-[18px] w-[18px]" />
+              {/* Company Admins */}
+              <Link
+                to="/company-admins"
+                className="group mb-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white"
+              >
+                <ShieldCheck className="h-[18px] w-[18px]" />
 
-            <span>Company Admins</span>
+                <span>Company Admins</span>
 
-            <ChevronRight className="ml-auto h-4 w-4 opacity-0 transition group-hover:opacity-100" />
-          </Link>
+                <ChevronRight className="ml-auto h-4 w-4 opacity-0 transition group-hover:opacity-100" />
+              </Link>
 
-          {/* Users */}
-          <Link
-            to="/users"
-            className="group mb-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white"
-          >
-            <Users className="h-[18px] w-[18px]" />
+              {/* Users */}
+              <Link
+                to="/users"
+                className="group mb-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white"
+              >
+                <Users className="h-[18px] w-[18px]" />
 
-            <span>Users</span>
+                <span>Users</span>
 
-            <ChevronRight className="ml-auto h-4 w-4 opacity-0 transition group-hover:opacity-100" />
-          </Link>
+                <ChevronRight className="ml-auto h-4 w-4 opacity-0 transition group-hover:opacity-100" />
+              </Link>
+            </>
+          )}
+
+          {/* ================= COMPANY ADMIN NAVIGATION ================= */}
+          {isCompanyAdmin && (
+            <Link
+              to="/users"
+              className="group mb-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white"
+            >
+              <Users className="h-[18px] w-[18px]" />
+
+              <span>Users</span>
+
+              <ChevronRight className="ml-auto h-4 w-4 opacity-0 transition group-hover:opacity-100" />
+            </Link>
+          )}
 
           <div className="my-6 border-t border-white/10" />
 
@@ -213,7 +263,7 @@ function Dashboard() {
               </p>
 
               <p className="truncate text-xs text-slate-400">
-                System Administrator
+                {displayRole}
               </p>
             </div>
           </div>
@@ -236,11 +286,11 @@ function Dashboard() {
 
           <div>
             <h1 className="text-lg font-semibold text-[#0F172A]">
-              System Admin Dashboard
+              {dashboardTitle}
             </h1>
 
             <p className="text-xs text-[#64748B]">
-              Enterprise management overview
+              {dashboardDescription}
             </p>
           </div>
 
@@ -252,7 +302,7 @@ function Dashboard() {
               </p>
 
               <p className="text-xs text-[#64748B]">
-                System Administrator
+                {displayRole}
               </p>
             </div>
 
@@ -262,303 +312,620 @@ function Dashboard() {
           </div>
         </header>
 
-        {/* Content */}
-        <main className="p-6 lg:p-8">
+        {/* ================= SYSTEM ADMIN CONTENT ================= */}
+        {isSystemAdmin && (
+          <main className="p-6 lg:p-8">
 
-          {/* Welcome */}
-          <div className="mb-8">
-            <p className="text-sm font-medium text-[#64748B]">
-              Overview
-            </p>
+            {/* Welcome */}
+            <div className="mb-8">
+              <p className="text-sm font-medium text-[#64748B]">
+                Overview
+              </p>
 
-            <h2 className="mt-1 text-2xl font-semibold tracking-tight text-[#0F172A]">
-              Welcome back, {user?.name}
-            </h2>
+              <h2 className="mt-1 text-2xl font-semibold tracking-tight text-[#0F172A]">
+                Welcome back, {user?.name}
+              </h2>
 
-            <p className="mt-2 text-sm text-[#64748B]">
-              Here's an overview of your enterprise management system.
-            </p>
-          </div>
-
-          {/* ================= STATISTICS ================= */}
-          <div className="grid gap-5 md:grid-cols-3">
-
-            {/* Companies */}
-            <div className="rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-
-              <div className="flex items-start justify-between">
-
-                <div>
-                  <p className="text-sm font-medium text-[#64748B]">
-                    Total Companies
-                  </p>
-
-                  <p className="mt-3 text-3xl font-semibold tracking-tight text-[#0F172A]">
-                    {stats?.totalCompanies ?? 0}
-                  </p>
-                </div>
-
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50">
-                  <Building2 className="h-5 w-5 text-[#4F46E5]" />
-                </div>
-              </div>
-
-              <p className="mt-4 text-xs text-[#64748B]">
-                Companies registered in the system
+              <p className="mt-2 text-sm text-[#64748B]">
+                Here's an overview of your enterprise management system.
               </p>
             </div>
 
-            {/* Admins */}
-            <div className="rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+            {/* ================= STATISTICS ================= */}
+            <div className="grid gap-5 md:grid-cols-3">
 
-              <div className="flex items-start justify-between">
+              {/* Companies */}
+              <div className="rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
 
-                <div>
-                  <p className="text-sm font-medium text-[#64748B]">
-                    Company Admins
-                  </p>
+                <div className="flex items-start justify-between">
 
-                  <p className="mt-3 text-3xl font-semibold tracking-tight text-[#0F172A]">
-                    {stats?.totalCompanyAdmins ?? 0}
-                  </p>
+                  <div>
+                    <p className="text-sm font-medium text-[#64748B]">
+                      Total Companies
+                    </p>
+
+                    <p className="mt-3 text-3xl font-semibold tracking-tight text-[#0F172A]">
+                      {stats?.totalCompanies ?? 0}
+                    </p>
+                  </div>
+
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50">
+                    <Building2 className="h-5 w-5 text-[#4F46E5]" />
+                  </div>
                 </div>
 
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50">
-                  <ShieldCheck className="h-5 w-5 text-[#4F46E5]" />
+                <p className="mt-4 text-xs text-[#64748B]">
+                  Companies registered in the system
+                </p>
+              </div>
+
+              {/* Admins */}
+              <div className="rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+
+                <div className="flex items-start justify-between">
+
+                  <div>
+                    <p className="text-sm font-medium text-[#64748B]">
+                      Company Admins
+                    </p>
+
+                    <p className="mt-3 text-3xl font-semibold tracking-tight text-[#0F172A]">
+                      {stats?.totalCompanyAdmins ?? 0}
+                    </p>
+                  </div>
+
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50">
+                    <ShieldCheck className="h-5 w-5 text-[#4F46E5]" />
+                  </div>
+                </div>
+
+                <p className="mt-4 text-xs text-[#64748B]">
+                  Administrators managing companies
+                </p>
+              </div>
+
+              {/* Users */}
+              <div className="rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+
+                <div className="flex items-start justify-between">
+
+                  <div>
+                    <p className="text-sm font-medium text-[#64748B]">
+                      Total Users
+                    </p>
+
+                    <p className="mt-3 text-3xl font-semibold tracking-tight text-[#0F172A]">
+                      {stats?.totalUsers ?? 0}
+                    </p>
+                  </div>
+
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50">
+                    <Users className="h-5 w-5 text-[#4F46E5]" />
+                  </div>
+                </div>
+
+                <p className="mt-4 text-xs text-[#64748B]">
+                  Users across the platform
+                </p>
+              </div>
+            </div>
+
+            {/* ================= LOWER CARDS ================= */}
+            <div className="mt-8 grid gap-6 lg:grid-cols-2">
+
+              {/* System Overview */}
+              <div className="rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm">
+
+                <div className="flex items-start gap-3">
+
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-50">
+                    <Activity className="h-5 w-5 text-[#4F46E5]" />
+                  </div>
+
+                  <div>
+                    <h3 className="text-base font-semibold text-[#0F172A]">
+                      System Overview
+                    </h3>
+
+                    <p className="mt-1 text-sm text-[#64748B]">
+                      Current state of the enterprise platform.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-6 space-y-4">
+
+                  <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-4">
+                    <span className="text-sm text-[#64748B]">
+                      Companies
+                    </span>
+
+                    <span className="text-sm font-semibold text-[#0F172A]">
+                      {stats?.totalCompanies ?? 0}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-4">
+                    <span className="text-sm text-[#64748B]">
+                      Company Administrators
+                    </span>
+
+                    <span className="text-sm font-semibold text-[#0F172A]">
+                      {stats?.totalCompanyAdmins ?? 0}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-[#64748B]">
+                      Users
+                    </span>
+
+                    <span className="text-sm font-semibold text-[#0F172A]">
+                      {stats?.totalUsers ?? 0}
+                    </span>
+                  </div>
                 </div>
               </div>
 
-              <p className="mt-4 text-xs text-[#64748B]">
-                Administrators managing companies
-              </p>
-            </div>
+              {/* Account */}
+              <div className="rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm">
 
-            {/* Users */}
-            <div className="rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+                <div className="flex items-start gap-3">
 
-              <div className="flex items-start justify-between">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-50">
+                    <UserRound className="h-5 w-5 text-[#4F46E5]" />
+                  </div>
 
-                <div>
-                  <p className="text-sm font-medium text-[#64748B]">
-                    Total Users
-                  </p>
+                  <div>
+                    <h3 className="text-base font-semibold text-[#0F172A]">
+                      Administrator Account
+                    </h3>
 
-                  <p className="mt-3 text-3xl font-semibold tracking-tight text-[#0F172A]">
-                    {stats?.totalUsers ?? 0}
-                  </p>
+                    <p className="mt-1 text-sm text-[#64748B]">
+                      Your system administrator account.
+                    </p>
+                  </div>
                 </div>
 
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50">
-                  <Users className="h-5 w-5 text-[#4F46E5]" />
+                <div className="mt-6 space-y-4">
+
+                  <div>
+                    <p className="text-xs font-medium uppercase tracking-wide text-[#94A3B8]">
+                      Name
+                    </p>
+
+                    <p className="mt-1 text-sm font-medium text-[#0F172A]">
+                      {user?.name || "—"}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-xs font-medium uppercase tracking-wide text-[#94A3B8]">
+                      Email
+                    </p>
+
+                    <p className="mt-1 text-sm font-medium text-[#0F172A]">
+                      {user?.email || "—"}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-xs font-medium uppercase tracking-wide text-[#94A3B8]">
+                      Role
+                    </p>
+
+                    <span className="mt-1 inline-flex rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-[#4338CA]">
+                      SYSTEM_ADMIN
+                    </span>
+                  </div>
                 </div>
               </div>
-
-              <p className="mt-4 text-xs text-[#64748B]">
-                Users across the platform
-              </p>
             </div>
-          </div>
 
-          {/* ================= LOWER CARDS ================= */}
-          <div className="mt-8 grid gap-6 lg:grid-cols-2">
-
-            {/* System Overview */}
-            <div className="rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm">
+            {/* ================= QUICK ACTIONS ================= */}
+            <div className="mt-8 rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm">
 
               <div className="flex items-start gap-3">
 
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-50">
-                  <Activity className="h-5 w-5 text-[#4F46E5]" />
+                  <BriefcaseBusiness className="h-5 w-5 text-[#4F46E5]" />
                 </div>
 
                 <div>
                   <h3 className="text-base font-semibold text-[#0F172A]">
-                    System Overview
+                    Quick Actions
                   </h3>
 
                   <p className="mt-1 text-sm text-[#64748B]">
-                    Current state of the enterprise platform.
+                    Manage your enterprise system.
                   </p>
                 </div>
               </div>
 
-              <div className="mt-6 space-y-4">
+              <div className="mt-6 grid gap-4 sm:grid-cols-3">
 
-                <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-4">
-                  <span className="text-sm text-[#64748B]">
-                    Companies
-                  </span>
+                {/* Manage Companies */}
+                <Link
+                  to="/companies"
+                  className="group rounded-lg border border-[#E2E8F0] p-4 text-left transition hover:border-indigo-200 hover:bg-indigo-50/40"
+                >
+                  <div className="flex items-center justify-between">
 
-                  <span className="text-sm font-semibold text-[#0F172A]">
-                    {stats?.totalCompanies ?? 0}
-                  </span>
+                    <Building2 className="h-5 w-5 text-[#4F46E5]" />
+
+                    <ChevronRight className="h-4 w-4 text-[#94A3B8] transition group-hover:translate-x-1 group-hover:text-[#4F46E5]" />
+                  </div>
+
+                  <p className="mt-4 text-sm font-semibold text-[#0F172A]">
+                    Manage Companies
+                  </p>
+
+                  <p className="mt-1 text-xs text-[#64748B]">
+                    View and manage all companies.
+                  </p>
+                </Link>
+
+                {/* Manage Admins */}
+                <Link
+                  to="/company-admins"
+                  className="group rounded-lg border border-[#E2E8F0] p-4 text-left transition hover:border-indigo-200 hover:bg-indigo-50/40"
+                >
+                  <div className="flex items-center justify-between">
+
+                    <ShieldCheck className="h-5 w-5 text-[#4F46E5]" />
+
+                    <ChevronRight className="h-4 w-4 text-[#94A3B8] transition group-hover:translate-x-1 group-hover:text-[#4F46E5]" />
+                  </div>
+
+                  <p className="mt-4 text-sm font-semibold text-[#0F172A]">
+                    Manage Company Admins
+                  </p>
+
+                  <p className="mt-1 text-xs text-[#64748B]">
+                    Manage company administrators.
+                  </p>
+                </Link>
+
+                {/* View Users */}
+                <Link
+                  to="/users"
+                  className="group rounded-lg border border-[#E2E8F0] p-4 text-left transition hover:border-indigo-200 hover:bg-indigo-50/40"
+                >
+                  <div className="flex items-center justify-between">
+
+                    <Users className="h-5 w-5 text-[#4F46E5]" />
+
+                    <ChevronRight className="h-4 w-4 text-[#94A3B8] transition group-hover:translate-x-1 group-hover:text-[#4F46E5]" />
+                  </div>
+
+                  <p className="mt-4 text-sm font-semibold text-[#0F172A]">
+                    View Users
+                  </p>
+
+                  <p className="mt-1 text-xs text-[#64748B]">
+                    View users across the platform.
+                  </p>
+                </Link>
+
+              </div>
+            </div>
+          </main>
+        )}
+
+        {/* ================= COMPANY ADMIN CONTENT ================= */}
+        {isCompanyAdmin && (
+          <main className="p-6 lg:p-8">
+
+            {/* Welcome */}
+            <div className="mb-8">
+              <p className="text-sm font-medium text-[#64748B]">
+                Company Overview
+              </p>
+
+              <h2 className="mt-1 text-2xl font-semibold tracking-tight text-[#0F172A]">
+                Welcome back, {user?.name}
+              </h2>
+
+              <p className="mt-2 text-sm text-[#64748B]">
+                Here's an overview of your company's users and roles.
+              </p>
+            </div>
+
+            {/* Company */}
+            <div className="mb-8 rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm">
+
+              <div className="flex items-center gap-3">
+
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50">
+                  <Building2 className="h-5 w-5 text-[#4F46E5]" />
                 </div>
 
-                <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-4">
-                  <span className="text-sm text-[#64748B]">
-                    Company Administrators
-                  </span>
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wide text-[#94A3B8]">
+                    Your Company
+                  </p>
 
-                  <span className="text-sm font-semibold text-[#0F172A]">
-                    {stats?.totalCompanyAdmins ?? 0}
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-[#64748B]">
-                    Users
-                  </span>
-
-                  <span className="text-sm font-semibold text-[#0F172A]">
-                    {stats?.totalUsers ?? 0}
-                  </span>
+                  <h3 className="mt-1 text-lg font-semibold text-[#0F172A]">
+                    {companyName}
+                  </h3>
                 </div>
               </div>
             </div>
 
-            {/* Account */}
-            <div className="rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm">
+            {/* ================= STATISTICS ================= */}
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+
+              {/* Total Users */}
+              <div className="rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+
+                <div className="flex items-start justify-between">
+
+                  <div>
+                    <p className="text-sm font-medium text-[#64748B]">
+                      Total Users
+                    </p>
+
+                    <p className="mt-3 text-3xl font-semibold tracking-tight text-[#0F172A]">
+                      {stats?.totalUsers ?? 0}
+                    </p>
+                  </div>
+
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50">
+                    <Users className="h-5 w-5 text-[#4F46E5]" />
+                  </div>
+                </div>
+
+                <p className="mt-4 text-xs text-[#64748B]">
+                  Users in your company
+                </p>
+              </div>
+
+              {/* HR */}
+              <div className="rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+
+                <div className="flex items-start justify-between">
+
+                  <div>
+                    <p className="text-sm font-medium text-[#64748B]">
+                      HR
+                    </p>
+
+                    <p className="mt-3 text-3xl font-semibold tracking-tight text-[#0F172A]">
+                      {roleCounts.HR}
+                    </p>
+                  </div>
+
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50">
+                    <UserRound className="h-5 w-5 text-[#4F46E5]" />
+                  </div>
+                </div>
+
+                <p className="mt-4 text-xs text-[#64748B]">
+                  Human resources users
+                </p>
+              </div>
+
+              {/* Managers */}
+              <div className="rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+
+                <div className="flex items-start justify-between">
+
+                  <div>
+                    <p className="text-sm font-medium text-[#64748B]">
+                      Managers
+                    </p>
+
+                    <p className="mt-3 text-3xl font-semibold tracking-tight text-[#0F172A]">
+                      {roleCounts.MANAGER}
+                    </p>
+                  </div>
+
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50">
+                    <ShieldCheck className="h-5 w-5 text-[#4F46E5]" />
+                  </div>
+                </div>
+
+                <p className="mt-4 text-xs text-[#64748B]">
+                  Managers in your company
+                </p>
+              </div>
+
+              {/* Regular Users */}
+              <div className="rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+
+                <div className="flex items-start justify-between">
+
+                  <div>
+                    <p className="text-sm font-medium text-[#64748B]">
+                      Users
+                    </p>
+
+                    <p className="mt-3 text-3xl font-semibold tracking-tight text-[#0F172A]">
+                      {roleCounts.USER}
+                    </p>
+                  </div>
+
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50">
+                    <Users className="h-5 w-5 text-[#4F46E5]" />
+                  </div>
+                </div>
+
+                <p className="mt-4 text-xs text-[#64748B]">
+                  Regular company users
+                </p>
+              </div>
+            </div>
+
+            {/* ================= LOWER CARDS ================= */}
+            <div className="mt-8 grid gap-6 lg:grid-cols-2">
+
+              {/* Company Overview */}
+              <div className="rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm">
+
+                <div className="flex items-start gap-3">
+
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-50">
+                    <Activity className="h-5 w-5 text-[#4F46E5]" />
+                  </div>
+
+                  <div>
+                    <h3 className="text-base font-semibold text-[#0F172A]">
+                      Company Overview
+                    </h3>
+
+                    <p className="mt-1 text-sm text-[#64748B]">
+                      Current user distribution in your company.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-6 space-y-4">
+
+                  <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-4">
+                    <span className="text-sm text-[#64748B]">
+                      Human Resources
+                    </span>
+
+                    <span className="text-sm font-semibold text-[#0F172A]">
+                      {roleCounts.HR}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-4">
+                    <span className="text-sm text-[#64748B]">
+                      Managers
+                    </span>
+
+                    <span className="text-sm font-semibold text-[#0F172A]">
+                      {roleCounts.MANAGER}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-[#64748B]">
+                      Users
+                    </span>
+
+                    <span className="text-sm font-semibold text-[#0F172A]">
+                      {roleCounts.USER}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Account */}
+              <div className="rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm">
+
+                <div className="flex items-start gap-3">
+
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-50">
+                    <UserRound className="h-5 w-5 text-[#4F46E5]" />
+                  </div>
+
+                  <div>
+                    <h3 className="text-base font-semibold text-[#0F172A]">
+                      Administrator Account
+                    </h3>
+
+                    <p className="mt-1 text-sm text-[#64748B]">
+                      Your company administrator account.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-6 space-y-4">
+
+                  <div>
+                    <p className="text-xs font-medium uppercase tracking-wide text-[#94A3B8]">
+                      Name
+                    </p>
+
+                    <p className="mt-1 text-sm font-medium text-[#0F172A]">
+                      {user?.name || "—"}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-xs font-medium uppercase tracking-wide text-[#94A3B8]">
+                      Email
+                    </p>
+
+                    <p className="mt-1 text-sm font-medium text-[#0F172A]">
+                      {user?.email || "—"}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-xs font-medium uppercase tracking-wide text-[#94A3B8]">
+                      Company
+                    </p>
+
+                    <p className="mt-1 text-sm font-medium text-[#0F172A]">
+                      {companyName}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-xs font-medium uppercase tracking-wide text-[#94A3B8]">
+                      Role
+                    </p>
+
+                    <span className="mt-1 inline-flex rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-[#4338CA]">
+                      COMPANY_ADMIN
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* ================= QUICK ACTIONS ================= */}
+            <div className="mt-8 rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm">
 
               <div className="flex items-start gap-3">
 
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-50">
-                  <UserRound className="h-5 w-5 text-[#4F46E5]" />
+                  <BriefcaseBusiness className="h-5 w-5 text-[#4F46E5]" />
                 </div>
 
                 <div>
                   <h3 className="text-base font-semibold text-[#0F172A]">
-                    Administrator Account
+                    Quick Actions
                   </h3>
 
                   <p className="mt-1 text-sm text-[#64748B]">
-                    Your system administrator account.
+                    Manage users in your company.
                   </p>
                 </div>
               </div>
 
-              <div className="mt-6 space-y-4">
+              <div className="mt-6 grid gap-4 sm:grid-cols-2">
 
-                <div>
-                  <p className="text-xs font-medium uppercase tracking-wide text-[#94A3B8]">
-                    Name
+                {/* Manage Users */}
+                <Link
+                  to="/users"
+                  className="group rounded-lg border border-[#E2E8F0] p-4 text-left transition hover:border-indigo-200 hover:bg-indigo-50/40"
+                >
+                  <div className="flex items-center justify-between">
+
+                    <Users className="h-5 w-5 text-[#4F46E5]" />
+
+                    <ChevronRight className="h-4 w-4 text-[#94A3B8] transition group-hover:translate-x-1 group-hover:text-[#4F46E5]" />
+                  </div>
+
+                  <p className="mt-4 text-sm font-semibold text-[#0F172A]">
+                    Manage Users
                   </p>
 
-                  <p className="mt-1 text-sm font-medium text-[#0F172A]">
-                    {user?.name || "—"}
+                  <p className="mt-1 text-xs text-[#64748B]">
+                    Create, view, edit, and delete users in your company.
                   </p>
-                </div>
+                </Link>
 
-                <div>
-                  <p className="text-xs font-medium uppercase tracking-wide text-[#94A3B8]">
-                    Email
-                  </p>
-
-                  <p className="mt-1 text-sm font-medium text-[#0F172A]">
-                    {user?.email || "—"}
-                  </p>
-                </div>
-
-                <div>
-                  <p className="text-xs font-medium uppercase tracking-wide text-[#94A3A8]">
-                    Role
-                  </p>
-
-                  <span className="mt-1 inline-flex rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-[#4338CA]">
-                    SYSTEM_ADMIN
-                  </span>
-                </div>
               </div>
             </div>
-          </div>
+          </main>
+        )}
 
-          {/* ================= QUICK ACTIONS ================= */}
-          <div className="mt-8 rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm">
-
-            <div className="flex items-start gap-3">
-
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-50">
-                <BriefcaseBusiness className="h-5 w-5 text-[#4F46E5]" />
-              </div>
-
-              <div>
-                <h3 className="text-base font-semibold text-[#0F172A]">
-                  Quick Actions
-                </h3>
-
-                <p className="mt-1 text-sm text-[#64748B]">
-                  Manage your enterprise system.
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-6 grid gap-4 sm:grid-cols-3">
-
-              {/* Manage Companies */}
-              <Link
-                to="/companies"
-                className="group rounded-lg border border-[#E2E8F0] p-4 text-left transition hover:border-indigo-200 hover:bg-indigo-50/40"
-              >
-                <div className="flex items-center justify-between">
-
-                  <Building2 className="h-5 w-5 text-[#4F46E5]" />
-
-                  <ChevronRight className="h-4 w-4 text-[#94A3B8] transition group-hover:translate-x-1 group-hover:text-[#4F46E5]" />
-                </div>
-
-                <p className="mt-4 text-sm font-semibold text-[#0F172A]">
-                  Manage Companies
-                </p>
-
-                <p className="mt-1 text-xs text-[#64748B]">
-                  View and manage all companies.
-                </p>
-              </Link>
-
-              {/* Manage Admins */}
-              <Link
-                to="/company-admins"
-                className="group rounded-lg border border-[#E2E8F0] p-4 text-left transition hover:border-indigo-200 hover:bg-indigo-50/40"
-              >
-                <div className="flex items-center justify-between">
-
-                  <ShieldCheck className="h-5 w-5 text-[#4F46E5]" />
-
-                  <ChevronRight className="h-4 w-4 text-[#94A3B8] transition group-hover:translate-x-1 group-hover:text-[#4F46E5]" />
-                </div>
-
-                <p className="mt-4 text-sm font-semibold text-[#0F172A]">
-                  Manage Company Admins
-                </p>
-
-                <p className="mt-1 text-xs text-[#64748B]">
-                  Manage company administrators.
-                </p>
-              </Link>
-
-              {/* View Users */}
-              <Link
-                to="/users"
-                className="group rounded-lg border border-[#E2E8F0] p-4 text-left transition hover:border-indigo-200 hover:bg-indigo-50/40"
-              >
-                <div className="flex items-center justify-between">
-
-                  <Users className="h-5 w-5 text-[#4F46E5]" />
-
-                  <ChevronRight className="h-4 w-4 text-[#94A3B8] transition group-hover:translate-x-1 group-hover:text-[#4F46E5]" />
-                </div>
-
-                <p className="mt-4 text-sm font-semibold text-[#0F172A]">
-                  View Users
-                </p>
-
-                <p className="mt-1 text-xs text-[#64748B]">
-                  View users across the platform.
-                </p>
-              </Link>
-
-            </div>
-          </div>
-        </main>
       </div>
     </div>
   );

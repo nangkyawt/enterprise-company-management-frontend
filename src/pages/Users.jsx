@@ -12,6 +12,9 @@ import {
   UserRound,
   Eye,
   X,
+  Plus,
+  Pencil,
+  Trash2,
 } from "lucide-react";
 
 import { useAuth } from "../context/useAuth";
@@ -19,6 +22,9 @@ import { apiRequest } from "../services/api";
 
 function Users() {
   const { user, logout } = useAuth();
+
+  const isSystemAdmin = user?.roles?.includes("SYSTEM_ADMIN");
+  const isCompanyAdmin = user?.roles?.includes("COMPANY_ADMIN");
 
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -29,7 +35,19 @@ function Users() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await apiRequest("/system-users");
+        let endpoint = "";
+
+        if (isSystemAdmin) {
+          endpoint = "/system-users";
+        } else if (isCompanyAdmin) {
+          endpoint = "/users";
+        } else {
+          throw new Error(
+            "You do not have permission to access users."
+          );
+        }
+
+        const response = await apiRequest(endpoint);
         const data = await response.json();
 
         if (!response.ok) {
@@ -47,7 +65,7 @@ function Users() {
     };
 
     fetchUsers();
-  }, []);
+  }, [isSystemAdmin, isCompanyAdmin]);
 
   const filteredUsers = users.filter((user) => {
     const search = searchTerm.toLowerCase();
@@ -62,6 +80,30 @@ function Users() {
 
   const firstLetter =
     user?.name?.charAt(0)?.toUpperCase() || "U";
+
+  const displayRole = isSystemAdmin
+    ? "System Administrator"
+    : isCompanyAdmin
+      ? "Company Administrator"
+      : "User";
+
+  const pageDescription = isSystemAdmin
+    ? "View users across the enterprise"
+    : isCompanyAdmin
+      ? "View users in your company"
+      : "View users";
+
+  const pageTitle = isSystemAdmin
+    ? "All Users"
+    : isCompanyAdmin
+      ? "Company Users"
+      : "Users";
+
+  const pageSubDescription = isSystemAdmin
+    ? "View users across all companies in the system."
+    : isCompanyAdmin
+      ? "View and manage users in your company."
+      : "View available users.";
 
   if (loading) {
     return (
@@ -143,29 +185,33 @@ function Users() {
             <ChevronRight className="ml-auto h-4 w-4 opacity-0 transition group-hover:opacity-100" />
           </Link>
 
-          {/* Companies */}
-          <Link
-            to="/companies"
-            className="group mb-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white"
-          >
-            <Building2 className="h-[18px] w-[18px]" />
+          {/* Companies - SYSTEM ADMIN ONLY */}
+          {isSystemAdmin && (
+            <Link
+              to="/companies"
+              className="group mb-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white"
+            >
+              <Building2 className="h-[18px] w-[18px]" />
 
-            <span>Companies</span>
+              <span>Companies</span>
 
-            <ChevronRight className="ml-auto h-4 w-4 opacity-0 transition group-hover:opacity-100" />
-          </Link>
+              <ChevronRight className="ml-auto h-4 w-4 opacity-0 transition group-hover:opacity-100" />
+            </Link>
+          )}
 
-          {/* Company Admins */}
-          <Link
-            to="/company-admins"
-            className="group mb-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white"
-          >
-            <ShieldCheck className="h-[18px] w-[18px]" />
+          {/* Company Admins - SYSTEM ADMIN ONLY */}
+          {isSystemAdmin && (
+            <Link
+              to="/company-admins"
+              className="group mb-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white"
+            >
+              <ShieldCheck className="h-[18px] w-[18px]" />
 
-            <span>Company Admins</span>
+              <span>Company Admins</span>
 
-            <ChevronRight className="ml-auto h-4 w-4 opacity-0 transition group-hover:opacity-100" />
-          </Link>
+              <ChevronRight className="ml-auto h-4 w-4 opacity-0 transition group-hover:opacity-100" />
+            </Link>
+          )}
 
           {/* Users - Active */}
           <Link
@@ -208,7 +254,7 @@ function Users() {
               </p>
 
               <p className="truncate text-xs text-slate-400">
-                System Administrator
+                {displayRole}
               </p>
             </div>
           </div>
@@ -235,7 +281,7 @@ function Users() {
             </h1>
 
             <p className="text-xs text-[#64748B]">
-              View users across the enterprise
+              {pageDescription}
             </p>
           </div>
 
@@ -247,7 +293,7 @@ function Users() {
               </p>
 
               <p className="text-xs text-[#64748B]">
-                System Administrator
+                {displayRole}
               </p>
             </div>
 
@@ -261,18 +307,33 @@ function Users() {
         <main className="p-6 lg:p-8">
 
           {/* Page heading */}
-          <div className="mb-8">
-            <p className="text-sm font-medium text-[#64748B]">
-              User Management
-            </p>
+          <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
 
-            <h2 className="mt-1 text-2xl font-semibold tracking-tight text-[#0F172A]">
-              All Users
-            </h2>
+            <div>
+              <p className="text-sm font-medium text-[#64748B]">
+                User Management
+              </p>
 
-            <p className="mt-2 text-sm text-[#64748B]">
-              View users across all companies in the system.
-            </p>
+              <h2 className="mt-1 text-2xl font-semibold tracking-tight text-[#0F172A]">
+                {pageTitle}
+              </h2>
+
+              <p className="mt-2 text-sm text-[#64748B]">
+                {pageSubDescription}
+              </p>
+            </div>
+
+            {/* Create - COMPANY ADMIN ONLY */}
+            {isCompanyAdmin && (
+              <button
+                type="button"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#4F46E5] px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#4338CA]"
+              >
+                <Plus className="h-4 w-4" />
+                Add User
+              </button>
+            )}
+
           </div>
 
           {/* ================= USERS CARD ================= */}
@@ -324,9 +385,12 @@ function Users() {
                       Email
                     </th>
 
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[#64748B]">
-                      Company
-                    </th>
+                    {/* Company - SYSTEM ADMIN ONLY */}
+                    {isSystemAdmin && (
+                      <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[#64748B]">
+                        Company
+                      </th>
+                    )}
 
                     <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[#64748B]">
                       Role
@@ -337,7 +401,7 @@ function Users() {
                     </th>
 
                     <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wide text-[#64748B]">
-                      Access
+                      {isSystemAdmin ? "Access" : "Actions"}
                     </th>
 
                   </tr>
@@ -348,7 +412,7 @@ function Users() {
                   {filteredUsers.length === 0 ? (
                     <tr>
                       <td
-                        colSpan="6"
+                        colSpan={isSystemAdmin ? 6 : 5}
                         className="px-6 py-12 text-center"
                       >
                         <UsersIcon className="mx-auto h-8 w-8 text-[#CBD5E1]" />
@@ -404,20 +468,22 @@ function Users() {
                             {currentUser.email || "—"}
                           </td>
 
-                          {/* Company */}
-                          <td className="px-6 py-4">
+                          {/* Company - SYSTEM ADMIN ONLY */}
+                          {isSystemAdmin && (
+                            <td className="px-6 py-4">
 
-                            <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-2">
 
-                              <Building2 className="h-4 w-4 text-[#94A3B8]" />
+                                <Building2 className="h-4 w-4 text-[#94A3B8]" />
 
-                              <span className="text-sm text-[#475569]">
-                                {currentUser.companyName || "—"}
-                              </span>
+                                <span className="text-sm text-[#475569]">
+                                  {currentUser.companyName || "—"}
+                                </span>
 
-                            </div>
+                              </div>
 
-                          </td>
+                            </td>
+                          )}
 
                           {/* Role */}
                           <td className="px-6 py-4">
@@ -442,29 +508,62 @@ function Users() {
                               : "—"}
                           </td>
 
-                          {/* Access */}
+                          {/* Actions */}
                           <td className="px-6 py-4 text-right">
 
-                            <button
-                              type="button"
-                              onClick={() => {
-                                console.log(
-                                  "Selected User:",
-                                  currentUser
-                                );
+                            {isSystemAdmin ? (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  console.log(
+                                    "Selected User:",
+                                    currentUser
+                                  );
 
-                                console.log(
-                                  "Created At:",
-                                  currentUser.createdAt
-                                );
+                                  console.log(
+                                    "Created At:",
+                                    currentUser.createdAt
+                                  );
 
-                                setSelectedUser(currentUser);
-                              }}
-                              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-[#4F46E5] transition hover:bg-indigo-50"
-                            >
-                              <Eye className="h-4 w-4" />
-                              View
-                            </button>
+                                  setSelectedUser(currentUser);
+                                }}
+                                className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-[#4F46E5] transition hover:bg-indigo-50"
+                              >
+                                <Eye className="h-4 w-4" />
+                                View
+                              </button>
+                            ) : (
+                              <div className="flex justify-end gap-1">
+
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedUser(currentUser);
+                                  }}
+                                  className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-[#4F46E5] transition hover:bg-indigo-50"
+                                >
+                                  <Eye className="h-4 w-4" />
+                                  View
+                                </button>
+
+                                <button
+                                  type="button"
+                                  className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-[#475569] transition hover:bg-[#F1F5F9]"
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                  Edit
+                                </button>
+
+                                <button
+                                  type="button"
+                                  className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-red-600 transition hover:bg-red-50"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                  Delete
+                                </button>
+
+                              </div>
+                            )}
 
                           </td>
 
@@ -487,13 +586,15 @@ function Users() {
 
             <div>
               <p className="text-sm font-medium text-[#312E81]">
-                System Administrator access
+                {isSystemAdmin
+                  ? "System Administrator access"
+                  : "Company Administrator access"}
               </p>
 
               <p className="mt-1 text-xs leading-5 text-[#4338CA]">
-                You can view users across all companies, but user
-                accounts are managed by their respective Company
-                Administrators.
+                {isSystemAdmin
+                  ? "You can view users across all companies, but user accounts are managed by their respective Company Administrators."
+                  : "You can view and manage users in your company."}
               </p>
             </div>
 
@@ -565,22 +666,24 @@ function Users() {
               {/* Details */}
               <div className="mt-6 space-y-5">
 
-                {/* Company */}
-                <div>
-                  <p className="text-xs font-medium uppercase tracking-wide text-[#94A3B8]">
-                    Company
-                  </p>
-
-                  <div className="mt-1 flex items-center gap-2">
-
-                    <Building2 className="h-4 w-4 text-[#94A3B8]" />
-
-                    <p className="text-sm font-medium text-[#334155]">
-                      {selectedUser.companyName || "—"}
+                {/* Company - SYSTEM ADMIN ONLY */}
+                {isSystemAdmin && (
+                  <div>
+                    <p className="text-xs font-medium uppercase tracking-wide text-[#94A3B8]">
+                      Company
                     </p>
 
+                    <div className="mt-1 flex items-center gap-2">
+
+                      <Building2 className="h-4 w-4 text-[#94A3B8]" />
+
+                      <p className="text-sm font-medium text-[#334155]">
+                        {selectedUser.companyName || "—"}
+                      </p>
+
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Role */}
                 <div>
