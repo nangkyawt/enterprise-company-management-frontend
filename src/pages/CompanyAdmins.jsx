@@ -32,6 +32,7 @@ function CompanyAdmins() {
 
   const [loading, setLoading] = useState(true);
   const [formLoading, setFormLoading] = useState(false);
+  const [deletingAdminId, setDeletingAdminId] = useState(null);
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -214,13 +215,22 @@ function CompanyAdmins() {
         );
       }
 
-      setSuccess(data.message);
-
       await fetchAdmins();
 
+      // Stop loading before closing the modal
+      setFormLoading(false);
+      closeModal();
+
+      // Show success message for 3 seconds
+      setSuccess(
+        editingAdmin
+          ? "Company admin updated successfully"
+          : "Company admin created successfully"
+      );
+
       setTimeout(() => {
-        closeModal();
-      }, 700);
+        setSuccess("");
+      }, 3000);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -244,6 +254,7 @@ function CompanyAdmins() {
     }
 
     try {
+      setDeletingAdminId(admin.id);
       setError("");
       setSuccess("");
 
@@ -262,13 +273,20 @@ function CompanyAdmins() {
         );
       }
 
-      setSuccess(data.message);
-
       setAdmins((current) =>
         current.filter((item) => item.id !== admin.id)
       );
+
+      // Show success message for 3 seconds
+      setSuccess("Company admin deleted successfully");
+
+      setTimeout(() => {
+        setSuccess("");
+      }, 3000);
     } catch (error) {
       setError(error.message);
+    } finally {
+      setDeletingAdminId(null);
     }
   };
 
@@ -730,11 +748,16 @@ function CompanyAdmins() {
                                 onClick={() =>
                                   handleDelete(admin)
                                 }
-                                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-600 transition hover:bg-red-50"
+                                disabled={
+                                  deletingAdminId === admin.id
+                                }
+                                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
                               >
                                 <Trash2 className="h-4 w-4" />
 
-                                Delete
+                                {deletingAdminId === admin.id
+                                  ? "Deleting..."
+                                  : "Delete"}
                               </button>
 
                             </div>
